@@ -22,7 +22,7 @@ public class SlotItem : MonoBehaviour, ISlottable
     }
 
     private RectTransform rectTransform;
-    private SlotItemType slotType; 
+    [SerializeField] private SlotItemType slotType; 
     private Vector2 tempPosition;
 
     public SlotItemType SlotType
@@ -97,5 +97,6 @@ public enum SlotItemType
     berry,
     melon,
     cherry,
-    horseShoe
+    horseShoe,
+    none,
 }

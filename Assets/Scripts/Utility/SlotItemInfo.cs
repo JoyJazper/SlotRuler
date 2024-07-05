@@ -14,7 +14,7 @@ public class SlotItemInfo : ScriptableObject
 
     public SlotItemData[] slotItems;
 
-    Dictionary<SlotItemType, Sprite> slotItemDictionary;
+    Dictionary<SlotItemType, Sprite> slotItemDictionary = new Dictionary<SlotItemType, Sprite>();
 
     private void OnEnable()
     {
@@ -23,7 +23,7 @@ public class SlotItemInfo : ScriptableObject
 
     private void InitializeDictionary()
     {
-        slotItemDictionary = new Dictionary<SlotItemType, Sprite>();
+        //Debug.LogError("Initializing dictionary");
         foreach (SlotItemData item in slotItems)
         {
             if (!slotItemDictionary.ContainsKey(item.key))
@@ -59,5 +59,15 @@ public class SlotItemInfo : ScriptableObject
         }
 
         return slotItemDictionary.Keys.ToList();
+    }
+
+    public void Clean()
+    {
+        //Debug.LogError("Cleaning the dictionary.");
+        if(slotItemDictionary != null)
+        {
+            slotItemDictionary.Clear();
+            slotItemDictionary = null;
+        }
     }
 }
