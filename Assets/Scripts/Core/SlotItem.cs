@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class SlotItem : MonoBehaviour, ISlottable
 {
     [SerializeField] private Image image;
-    [SerializeField] private TMP_Text text;
     
     public float Height
     {
@@ -83,20 +82,17 @@ public enum SlotItemType
     heart,
     club,
     bar,
-    bar2,
-    bar3,
     cap,
     cash,
     bell,
     coin,
-    coinM,
     ccoin,
-    ccoinM,
     clove,
     cup,
     berry,
     melon,
     cherry,
     horseShoe,
+    crown,
     none,
 }
