@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: SlotItemInfo1
   m_EditorClassIdentifier: 
   slotItems:
-  - key: 0
-    value: {fileID: 21300000, guid: 1b8245c3cfe4da045b1cda9a95ea370e, type: 3}
+  - key: 3
+    value: {fileID: 21300000, guid: 560f5ed22a5cf0e429033629c81c6377, type: 3}
   - key: 1
     value: {fileID: 21300000, guid: 38620e851032f8441816eab5dd359af1, type: 3}
   - key: 2
     value: {fileID: 21300000, guid: 81cf95a5c28ab974fb76794f70d9687e, type: 3}
-  - key: 3
-    value: {fileID: 21300000, guid: 560f5ed22a5cf0e429033629c81c6377, type: 3}
+  - key: 0
+    value: {fileID: 21300000, guid: 1b8245c3cfe4da045b1cda9a95ea370e, type: 3}
   - key: 5
     value: {fileID: 21300000, guid: 70f7b61ee45a96f4bb9f3badd2ce73e6, type: 3}
   - key: 17
