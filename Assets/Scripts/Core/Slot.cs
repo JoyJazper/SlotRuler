@@ -25,6 +25,8 @@ public class Slot : MonoBehaviour
         movementManager = new SlotMovementManager(slotPanel, lasttop, ref slotInfo, ref visibleItems);
 
         playButton.onClick.AddListener(OnRollPress);
+
+        TargetSelector.RegisterSlot?.Invoke(this);
     }
 
     private void FixedUpdate()
@@ -35,6 +37,11 @@ public class Slot : MonoBehaviour
     private void OnRollPress()
     {
         StartRoll();
+    }
+
+    internal void SetTarget(SlotItemType type)
+    {
+        targetType = type;
     }
 
     private void StartRoll()

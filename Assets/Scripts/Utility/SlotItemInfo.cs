@@ -61,6 +61,16 @@ public class SlotItemInfo : ScriptableObject
         return slotItemDictionary.Keys.ToList();
     }
 
+    public SlotItemType[] GetSlotItemArray()
+    {
+        if (slotItemDictionary == null)
+        {
+            InitializeDictionary();
+        }
+
+        return slotItemDictionary.Keys.ToArray();
+    }
+
     public void Clean()
     {
         //Debug.LogError("Cleaning the dictionary.");
