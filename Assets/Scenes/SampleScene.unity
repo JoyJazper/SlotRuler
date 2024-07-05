@@ -791,7 +791,7 @@ PrefabInstance:
       objectReference: {fileID: 1177467040}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: targetType
-      value: 18
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: ResultDelay
@@ -1084,7 +1084,7 @@ PrefabInstance:
       objectReference: {fileID: 1177467040}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: targetType
-      value: 18
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: ResultDelay
@@ -2031,6 +2031,10 @@ PrefabInstance:
       propertyPath: playButton
       value: 
       objectReference: {fileID: 1177467040}
+    - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
+      propertyPath: targetType
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8715581895606008220, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: m_Name
       value: Slot1

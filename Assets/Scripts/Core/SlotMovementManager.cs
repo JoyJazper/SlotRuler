@@ -32,6 +32,8 @@ public class SlotMovementManager
     private void GenerateTarget()
     {
         targetItemIndex = Random.Range(0, visibleItems.Length);
+        targetItemType = visibleItems[targetItemIndex].SlotType;
+        CoroutineStarter.Instance.DED(" Random Target : " + targetItemType.ToString());
     }
 
     public void CheckMovement()
@@ -74,7 +76,7 @@ public class SlotMovementManager
         if (targettype != SlotItemType.none)
         {
             targetItemType = targettype;
-            
+            CoroutineStarter.Instance.DED(" Target Item from start : " + targetItemType.ToString());
         }
         else
         {
@@ -88,10 +90,17 @@ public class SlotMovementManager
     private IEnumerator StopRoll()
     {
         yield return new WaitForSeconds(resultDelay);
-        float distance = visibleItems[targetItemIndex].GetPosition();
+        float distance = 1000f;
         while (moveDownCoef != 0)
         {
-            distance = visibleItems[targetItemIndex].GetPosition();
+            if(targetItemIndex >= 0)
+            {
+                distance = visibleItems[targetItemIndex].GetPosition();
+            }
+            else
+            {
+                distance = 1000f;
+            }
             if (AdjustMoveDownCoef(distance))
             {
                 MoveAllitems(distance);
@@ -143,6 +152,11 @@ public class SlotMovementManager
 
     private void ReuseItem(int index)
     {
+        if (targetItemType == visibleItems[index].SlotType)
+        {
+            targetItemIndex = -1;
+        }
+
         float newYPosition = visibleItems[lastTopIndex].GetPosition() + itemHeight;
         visibleItems[index].SetPosition(newYPosition);
 
@@ -159,8 +173,10 @@ public class SlotMovementManager
         lastTopIndex = index;
 
         SlotItemType newType = itemTypes[lastIndex];
+        
         if(newType == targetItemType)
         {
+            CoroutineStarter.Instance.DED(" Target Item from reset : " + targetItemType.ToString());
             targetItemIndex = index;
         }
         visibleItems[index].SetCharacter(newType, info.GetValue(newType));
