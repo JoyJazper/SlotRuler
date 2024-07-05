@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using Unity.Mathematics;
-using System.Linq;
 
 public class Slot : MonoBehaviour
 {
@@ -19,7 +17,6 @@ public class Slot : MonoBehaviour
     private SlotItem newLastTop = null;
 
     [SerializeField] private float moveDownSpeed = 100f;
-    [SerializeField] private int rollCount = 10;
 
     [SerializeField] private SlotItemType target;
     [SerializeField] private SlotItem targetItem;
@@ -35,6 +32,8 @@ public class Slot : MonoBehaviour
     {
         SetupPlayGround();
         compareValue = -3f * template.Height;
+
+        initialLastTop = lastTop;
     }
 
     List<SlotItemType> items;
@@ -99,7 +98,7 @@ public class Slot : MonoBehaviour
         roll = 1;
         if(targetItem == null)
         {
-            int rand = UnityEngine.Random.Range(0, visibleItems.Count() - 1);
+            int rand = UnityEngine.Random.Range(0, visibleItems.Length - 1);
             targetItem = visibleItems[rand];
         }
         // Start the rolling process after moving back
@@ -109,46 +108,37 @@ public class Slot : MonoBehaviour
     private void CoverRoll()
     {
         StopAllCoroutines();
-        StartCoroutine(WaitForRoll());      
+        Stop();  
     }
-
-    IEnumerator WaitForRoll()
-    {
-        yield return new WaitWhile(() => rollCount > roll);
-        Stop();
-    }
-
 
     private void Stop()
     {
-        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, 0.12f, 5f).OnComplete(() =>
-            DOTween.To(() => moveDownCoef, x => moveDownCoef = x, 0.05f, 5f).OnComplete(() => StartCoroutine(SlowDownRoll()))
-        );
+        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, 1.5f, 1f).OnComplete(() => StartCoroutine(SlowDownRoll()));
+        //DOTween.To(() => moveDownCoef, x => moveDownCoef = x, 1.5f, 1f).OnComplete(() =>
+        //    DOTween.To(() => moveDownCoef, x => moveDownCoef = x, 0.5f, 1f).OnComplete(() => StartCoroutine(SlowDownRoll()))
+        //);
     }
 
     IEnumerator SlowDownRoll()
     {
-        Debug.LogError("ERNOS : Starting the end.");
+        //Debug.LogError("ERNOS : Starting the end.");
         float distance = targetItem.GetPosition();
         while(distance != 0)
         {
             distance = targetItem.GetPosition();
-            if(moveDownCoef > 0.05f)
+            if(moveDownCoef > 0.2f)
             {
-                if (distance < 600f && distance > 80f)
+                if (distance < 500f && distance > 80f)
                 {
                     moveDownCoef = moveDownCoef - moveDownCoef / MathF.Abs(distance);
-                    Debug.LogError("ERNOS : Phase 1 : " + distance.ToString() + " and speed coef = " + moveDownCoef);
+                    //Debug.LogError("ERNOS : Phase 1 : " + distance.ToString() + " and speed coef = " + moveDownCoef);
                 }
             }
             else
             {
-                moveDownCoef = 0.05f;
                 if (distance < 2f && distance > -2f)
                 {
-                    moveDownCoef = 0f;
-
-                    Debug.LogError("ERNOS : Phase 3 : " + distance.ToString() + " and speed coef = " + moveDownCoef);
+                    //Debug.LogError("ERNOS : Phase 3 : " + distance.ToString() + " and speed coef = " + moveDownCoef);
                     moveDownCoef = 0f;
                     shouldMove = false;
                     for (int i = 0; i < visibleItems.Length; i++)
@@ -163,7 +153,7 @@ public class Slot : MonoBehaviour
         }
         
         SlotPanel.DOShakeAnchorPos(0.2f, 20f);
-        Debug.LogError("ERNOS : result : " + targetItem.SlotType.ToString());
+        //Debug.LogError("ERNOS : result : " + targetItem.SlotType.ToString());
         shouldMove = false;
         targetItem = null;
         yield return null;

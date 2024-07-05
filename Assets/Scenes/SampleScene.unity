@@ -132,9 +132,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 40195195}
-  - component: {fileID: 40195196}
   m_Layer: 5
-  m_Name: Pool
+  m_Name: Template
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -160,20 +159,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &40195196
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 40195194}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb4b89ab3cd43004398f60004f5201d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
-  poolSize: 20
 --- !u!1 &355666905
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +655,14 @@ MonoBehaviour:
   SlotPanel: {fileID: 688661453}
   template: {fileID: 794349967}
   slotInfo: {fileID: 11400000, guid: 765d20710a20d224e9f96b702833f847, type: 2}
+  visibleItems:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   moveDownSpeed: 100
   rollCount: 10
   target: 0
@@ -728,6 +721,14 @@ MonoBehaviour:
   SlotPanel: {fileID: 695049993}
   template: {fileID: 794349967}
   slotInfo: {fileID: 11400000, guid: 765d20710a20d224e9f96b702833f847, type: 2}
+  visibleItems:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   moveDownSpeed: 100
   rollCount: 10
   target: 0
@@ -916,6 +917,14 @@ MonoBehaviour:
   SlotPanel: {fileID: 1096108677}
   template: {fileID: 794349967}
   slotInfo: {fileID: 11400000, guid: 765d20710a20d224e9f96b702833f847, type: 2}
+  visibleItems:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   moveDownSpeed: 100
   rollCount: 10
   target: 0

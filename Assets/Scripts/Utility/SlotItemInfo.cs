@@ -51,16 +51,6 @@ public class SlotItemInfo : ScriptableObject
         }
     }
 
-    public int GetCount()
-    {
-        if (slotItemDictionary == null)
-        {
-            InitializeDictionary();
-        }
-
-        return slotItemDictionary.Count;
-    }
-
     public List<SlotItemType> GetSlotItemList()
     {
         if (slotItemDictionary == null)
