@@ -22,7 +22,7 @@ public class Slot : MonoBehaviour
         int lasttop = slotItemCount - 1;
         setupManager = new SlotSetupManager(slotPanel, template, slotInfo, slotItemCount);
         (visibleItems, lasttop) =  setupManager.SetupPlayGround();
-        movementManager = new SlotMovementManager(slotPanel, lasttop, ref slotInfo, ref visibleItems);
+        movementManager = new SlotMovementManager(lasttop, ref slotInfo, ref visibleItems);
         //movementManager.MovementStopped += StopStopWatch;
 
         playButton.onClick.AddListener(OnRollPress);

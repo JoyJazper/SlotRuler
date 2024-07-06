@@ -11,22 +11,17 @@ public class SlotMovementManager
     private readonly float totalTime = 1.5f;
     private readonly float rollInitalPull = -0.5f;
 
-    // it was used for end shake
-    private RectTransform slotPanel;
-
     private SlotItemInfo info;
 
     private float moveDownCoef = 1f, checkEndHeight = 0f, itemHeight = 200f, resultDelay = 0f;
-    public bool shouldMove = false;
-
+    private bool shouldMove = false, fixedOutput = false;
     private int lastTopIndex = -1, targetItemIndex = -1;
     private SlotItemType targetItemType = SlotItemType.none;
     private SlotItem[] visibleItems;
     private List<SlotItemType> itemTypes = new List<SlotItemType>();
 
-    public SlotMovementManager(RectTransform slotPanel, int topItemIndex, ref SlotItemInfo info, ref SlotItem[] visibleItems)
+    public SlotMovementManager(int topItemIndex, ref SlotItemInfo info, ref SlotItem[] visibleItems)
     {
-        this.slotPanel = slotPanel;
         lastTopIndex = topItemIndex;
         this.visibleItems = visibleItems;
         this.info = info;
@@ -143,7 +138,7 @@ public class SlotMovementManager
         return (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
     }
 
-    bool fixedOutput  = false;
+    
 
     // returns true if its zero
     private bool AdjustMoveDownCoef(float distance)
