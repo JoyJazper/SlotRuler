@@ -2,6 +2,8 @@
 
 **slotruler** is a modular slot game designed to provide control over timing and results effortlessly.
 
+Branch Submission will never be merged to Master.
+
 ## Getting Started
 
 ### Prerequisites
