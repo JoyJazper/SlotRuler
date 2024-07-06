@@ -97,9 +97,26 @@ public class SlotMovementManager
         yield return new WaitForSeconds(resultDelay * 0.2f);
         float distance = 1000f;
         fixedOutput = false;
-        int skipCount;
-        int index1 = itemTypes.IndexOf(visibleItems[lastTopIndex].SlotType);
-        int index2 = itemTypes.IndexOf(targetItemType);
+
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < itemTypes.Count; i++)
+        {
+            if (itemTypes[i] == visibleItems[lastTopIndex].SlotType)
+            {
+                index1 = i;
+            }
+            if (itemTypes[i] == targetItemType)
+            {
+                index2 = i;
+            }
+            if (index1 != -1 && index2 != -1)
+            {
+                break;
+            }
+        }
+
+        int skipCount = (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
+
         if (index1 < index2)
         {
             skipCount = index2 - index1;
