@@ -510,8 +510,8 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 891787746877819556}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
-      propertyPath: targetType
-      value: 18
+      propertyPath: ResultDelay
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8715581895606008220, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: m_Name
@@ -639,10 +639,6 @@ PrefabInstance:
       propertyPath: playButton
       value: 
       objectReference: {fileID: 891787746877819556}
-    - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
-      propertyPath: targetType
-      value: 18
-      objectReference: {fileID: 0}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: ResultDelay
       value: 2
@@ -907,10 +903,6 @@ PrefabInstance:
       propertyPath: playButton
       value: 
       objectReference: {fileID: 891787746877819556}
-    - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
-      propertyPath: targetType
-      value: 18
-      objectReference: {fileID: 0}
     - target: {fileID: 8113162060792712756, guid: 9f40bb3c33033cc4dbfa121f6aa214be, type: 3}
       propertyPath: ResultDelay
       value: 1

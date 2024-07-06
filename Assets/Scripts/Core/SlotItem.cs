@@ -1,10 +1,24 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SlotItem : MonoBehaviour, ISlottable
 {
     [SerializeField] private Image image;
+    
+
+    private RectTransform rectTransform;
+    private Vector2 tempPosition;
+
+    public SlotItemType SlotType
+    {
+        get
+        {
+            return slotType;
+        }
+
+        private set { }
+    }
+    private SlotItemType slotType; 
     
     public float Height
     {
@@ -18,20 +32,6 @@ public class SlotItem : MonoBehaviour, ISlottable
                 return rectTransform.rect.height;
             }
         }
-    }
-
-    private RectTransform rectTransform;
-    [SerializeField] private SlotItemType slotType; 
-    private Vector2 tempPosition;
-
-    public SlotItemType SlotType
-    {
-        get
-        {
-            return slotType;
-        }
-
-        private set { }
     }
 
     private void Awake()
@@ -82,17 +82,10 @@ public enum SlotItemType
     heart,
     club,
     bar,
-    cap,
     cash,
     bell,
-    coin,
-    ccoin,
-    clove,
-    cup,
     berry,
-    melon,
     cherry,
-    horseShoe,
     crown,
     none,
 }

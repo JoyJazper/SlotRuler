@@ -3,16 +3,17 @@ using UnityEngine;
 using DG.Tweening;
 using JoyKit.Utility;
 using System.Collections.Generic;
-using System;
+
 public class SlotMovementManager
 {
-    public event Action MovementStopped;
     private readonly float moveDownSpeed = 100f;
     private readonly float topSpeedCoef = 1f;
     private readonly float totalTime = 1.5f;
     private readonly float rollInitalPull = -0.5f;
 
+    // it was used for end shake
     private RectTransform slotPanel;
+
     private SlotItemInfo info;
 
     private float moveDownCoef = 1f, checkEndHeight = 0f, itemHeight = 200f, resultDelay = 0f;
@@ -76,9 +77,9 @@ public class SlotMovementManager
     public void StartRoll(float delay = 0f, SlotItemType targettype = SlotItemType.none)
     {
         if (shouldMove) return;
-        resultDelay = delay;
-        moveDownCoef = rollInitalPull;
-        shouldMove = true;
+
+        SetMoveState(delay);
+
         if (targettype != SlotItemType.none)
         {
             targetItemType = targettype;
@@ -87,17 +88,42 @@ public class SlotMovementManager
         {
             GenerateTarget();
         }
+
         DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime/2).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
     }
 
-    
+    private void SetMoveState(float delay)
+    {
+        resultDelay = delay;
+        moveDownCoef = rollInitalPull;
+        shouldMove = true;
+    }
 
     private IEnumerator StopRoll()
     {
         yield return new WaitForSeconds(resultDelay * 0.2f);
-        float distance = 1000f;
-        fixedOutput = false;
 
+        int IndexDistance = CalculateIndexDistance();
+
+        float totalDistance = itemHeight * IndexDistance;
+        MoveAllitems(totalDistance);
+
+        while (true)
+        {
+            if (targetItemIndex >= 0)
+            {
+                float distance = visibleItems[targetItemIndex].GetPosition();
+                AdjustMoveDownCoef(distance);
+                if (Mathf.Approximately(distance, 0))
+                    break;
+            }
+            yield return new WaitForFixedUpdate();
+        }
+        ResetValues();
+    }
+
+    private int CalculateIndexDistance()
+    {
         int index1 = -1, index2 = -1;
         for (int i = 0; i < itemTypes.Count; i++)
         {
@@ -114,29 +140,7 @@ public class SlotMovementManager
                 break;
             }
         }
-
-        int skipCount = (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
-
-        if (index1 < index2)
-        {
-            skipCount = index2 - index1;
-        }
-        else
-        {
-            skipCount = itemTypes.Count - (index1 - index2);
-        }
-        MoveAllitems(itemHeight * skipCount);
-
-        do
-        {
-            if (targetItemIndex >= 0)
-            {
-                distance = visibleItems[targetItemIndex].GetPosition();
-                AdjustMoveDownCoef(distance);
-            }
-            yield return new WaitForFixedUpdate();
-        } while (distance != 0);
-        ResetValues();
+        return (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
     }
 
     bool fixedOutput  = false;
@@ -144,23 +148,25 @@ public class SlotMovementManager
     // returns true if its zero
     private bool AdjustMoveDownCoef(float distance)
     {
-        if (distance >= 0)
+        if (distance < 0)
         {
-            if(distance < 100)
-            {
-                moveDownCoef = 0f;
-                distance = visibleItems[targetItemIndex].GetPosition();
-                MoveAllitems(distance);
-                MovementStopped?.Invoke();
-                return true;
-            }
-            else if(distance > 100 && !fixedOutput)
-            {
-                fixedOutput = true;
+            return false;
+        }
 
-                distance = visibleItems[targetItemIndex].GetPosition();
-                MoveAllitems(distance - 500);
-            }
+        if (distance < 100)
+        {
+            moveDownCoef = 0f;
+            float newPosition = visibleItems[targetItemIndex].GetPosition();
+            MoveAllitems(newPosition);
+            //MovementStopped?.Invoke();
+            return true;
+        }
+
+        if (distance > 100 && !fixedOutput)
+        {
+            fixedOutput = true;
+            float newPosition = visibleItems[targetItemIndex].GetPosition();
+            MoveAllitems(newPosition - 500);
         }
 
         return false;
@@ -176,6 +182,7 @@ public class SlotMovementManager
 
     private void ResetValues()
     {
+        fixedOutput = false;
         shouldMove = false;
         targetItemIndex = -1;
     }
@@ -208,10 +215,8 @@ public class SlotMovementManager
 
             if (newType == targetItemType)
             {
-                /*CoroutineStarter.Instance.DED(" Target Item from reset : " + targetItemType.ToString());*/
                 targetItemIndex = index;
             }
-            visibleItems[index].SetCharacter(newType, info.GetValue(newType));
             visibleItems[index].SetCharacter(newType, info.GetValue(newType));
         }
         reuseItemIndex.Clear();

@@ -14,12 +14,9 @@ public class TargetSelector : MonoBehaviour
 
     [SerializeField] private Button slot_Template;
     [SerializeField] private Button slotItem_Template;
-
     [SerializeField] private Transform slot_Parent;
     [SerializeField] private Transform slotitem_Parent;
-
     [SerializeField] private SlotItemInfo slotInfo;
-
     [SerializeField] private Transform uiBase;
 
     private ObjectPooler<Button> slotPooler;

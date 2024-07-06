@@ -182,8 +182,7 @@ MonoBehaviour:
   slotPanel: {fileID: 6504523202606885229}
   template: {fileID: 0}
   slotInfo: {fileID: 11400000, guid: 765d20710a20d224e9f96b702833f847, type: 2}
-  targetType: 18
+  targetType: 11
   ResultDelay: 0
   slotItemCount: 7
   playButton: {fileID: 0}
-  timer: {fileID: 0}
