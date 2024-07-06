@@ -3,8 +3,10 @@ using UnityEngine;
 using DG.Tweening;
 using JoyKit.Utility;
 using System.Collections.Generic;
+using System;
 public class SlotMovementManager
 {
+    public event Action MovementStopped;
     private readonly float moveDownSpeed = 100f;
     private readonly float topSpeedCoef = 1f;
     private readonly float totalTime = 1.5f;
@@ -15,6 +17,7 @@ public class SlotMovementManager
 
     private float moveDownCoef = 1f, checkEndHeight = 0f, itemHeight = 200f, resultDelay = 0f;
     public bool shouldMove = false;
+
     private int lastTopIndex = -1, targetItemIndex = -1;
     private SlotItemType targetItemType = SlotItemType.none;
     private SlotItem[] visibleItems;
@@ -33,9 +36,9 @@ public class SlotMovementManager
 
     private void GenerateTarget()
     {
-        targetItemIndex = Random.Range(0, visibleItems.Length);
+        targetItemIndex = UnityEngine.Random.Range(0, visibleItems.Length);
         targetItemType = visibleItems[targetItemIndex].SlotType;
-        CoroutineStarter.Instance.DED(" Random Target : " + targetItemType.ToString());
+        //CoroutineStarter.Instance.DED(" Random Target : " + targetItemType.ToString());
     }
 
     public void CheckMovement()
@@ -46,22 +49,24 @@ public class SlotMovementManager
         }
     }
 
+    List<int> reuseItemIndex = new List<int>();
+
     public void Move()
     {
         float rollSpeed = moveDownSpeed * moveDownCoef;
-        int reuseItemIndex = -1;
+        
         for (int i = 0; i < visibleItems.Length; i++)
         {
             if (visibleItems[i].GetPosition() <= checkEndHeight)
             {
-                reuseItemIndex = i;
+                reuseItemIndex.Add(i);
             }
             else
             {
                 visibleItems[i].MoveDown(rollSpeed);
             }
         }
-        if(reuseItemIndex != -1)
+        if(reuseItemIndex.Count > 0)
         {
             ReuseItem(reuseItemIndex);
         }
@@ -74,62 +79,98 @@ public class SlotMovementManager
         resultDelay = delay;
         moveDownCoef = rollInitalPull;
         shouldMove = true;
+
         //CoroutineStarter.Instance.DED("Time to roll");
         if (targettype != SlotItemType.none)
         {
             targetItemType = targettype;
-            CoroutineStarter.Instance.DED(" Target Item from start : " + targetItemType.ToString());
+            //CoroutineStarter.Instance.DED(" Target Item from start : " + targetItemType.ToString());
         }
         else
         {
             GenerateTarget();
         }
-        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime/3).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
+        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime/2).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
     }
 
     
 
     private IEnumerator StopRoll()
     {
-        yield return new WaitForSeconds(resultDelay * totalTime / 3);
+        yield return new WaitForSeconds(resultDelay * 0.2f);
         float distance = 1000f;
-        while (moveDownCoef != 0)
+        fixedOutput = false;
+       // if (targetItemIndex >= 0)
+       // {
+       //     distance = visibleItems[targetItemIndex].GetPosition();
+       //     if (distance < 0)
+       //     {
+       //         MoveAllitems(itemHeight * 3 - distance);
+       //     }
+       //     if (resultDelay == 0)
+       //         CoroutineStarter.Instance.DED(" Distance 1  " + distance);
+       // }
+       // else
+       // {
+        int skipCount;
+        int index1 = itemTypes.IndexOf(visibleItems[lastTopIndex].SlotType);
+        int index2 = itemTypes.IndexOf(targetItemType);
+        if (index1 < index2)
         {
-            if(targetItemIndex >= 0)
+            skipCount = index2 - index1;
+        }
+        else
+        {
+            skipCount = itemTypes.Count - (index1 - index2);
+        }
+        MoveAllitems(itemHeight * skipCount);
+        //if(resultDelay == 0)
+        //    CoroutineStarter.Instance.DED(" Distance 2  " + distance);
+
+        do
+        {
+            if (targetItemIndex >= 0)
             {
                 distance = visibleItems[targetItemIndex].GetPosition();
+                AdjustMoveDownCoef(distance);
             }
-            else
-            {
-                distance = 1000f;
-            }
-            if (AdjustMoveDownCoef(distance))
-            {
-                MoveAllitems(distance);
-            }
-
-            yield return null;
-        }
+            yield return new WaitForFixedUpdate();
+        } while (distance != 0);
         
         //slotPanel.DOShakeAnchorPos(0.2f, 20f).OnComplete(() => ResetValues());
         ResetValues();
     }
 
-    float deceleration = 9f;
+    bool fixedOutput  = false;
 
     // returns true if its zero
     private bool AdjustMoveDownCoef(float distance)
     {
+        //if (resultDelay == 0)
+        //    CoroutineStarter.Instance.DED(" Distance 5  " + distance);
+        if (distance >= 0)
+        {
+            if(distance < 100)
+            {
+                //if (resultDelay == 0)
+                //    CoroutineStarter.Instance.DED(" Distance 6  " + distance);
+                moveDownCoef = 0f;
+                distance = visibleItems[targetItemIndex].GetPosition();
+                MoveAllitems(distance);
+                MovementStopped?.Invoke();
+                return true;
+            }
+            else if(distance > 100 && !fixedOutput)
+            {
+                fixedOutput = true;
 
-        if (moveDownCoef > 0.8f)
-        {
-            moveDownCoef -= moveDownCoef / deceleration;
-            moveDownCoef = Mathf.Clamp(moveDownCoef, 0.8f, topSpeedCoef);
-        }
-        if (distance > 0 && distance < 50f)
-        {
-            moveDownCoef = 0f;
-            return true;
+                distance = visibleItems[targetItemIndex].GetPosition();
+                MoveAllitems(distance - 500);
+                //CoroutineStarter.Instance.DED(" Fixed Output  " + distance);
+                //distance = visibleItems[targetItemIndex].GetPosition();
+                //CoroutineStarter.Instance.DED(" Fixed Output  " + distance);
+                //DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef/2, totalTime / 3);
+            }
         }
 
         return false;
@@ -149,39 +190,41 @@ public class SlotMovementManager
         targetItemIndex = -1;
     }
 
-
-    
-
-    private void ReuseItem(int index)
+    private void ReuseItem(List<int> indexes)
     {
-        if (targetItemType == visibleItems[index].SlotType)
+        foreach(var index in indexes)
         {
-            targetItemIndex = -1;
-        }
+            if (targetItemType == visibleItems[index].SlotType)
+            {
+                targetItemIndex = -1;
+            }
 
-        float newYPosition = visibleItems[lastTopIndex].GetPosition() + itemHeight;
-        visibleItems[index].SetPosition(newYPosition);
+            float newYPosition = visibleItems[lastTopIndex].GetPosition() + itemHeight;
+            visibleItems[index].SetPosition(newYPosition);
 
-        int lastIndex = itemTypes.IndexOf(visibleItems[lastTopIndex].SlotType) + 1;
-        if (lastIndex >= itemTypes.Count)
-        {
-            lastIndex = 0;
-        }
-        else if(lastIndex < 0)
-        {
-            lastIndex = 0;
-        }
+            int lastIndex = itemTypes.IndexOf(visibleItems[lastTopIndex].SlotType) + 1;
+            if (lastIndex >= itemTypes.Count)
+            {
+                lastIndex = 0;
+            }
+            else if (lastIndex < 0)
+            {
+                lastIndex = 0;
+            }
 
-        lastTopIndex = index;
+            lastTopIndex = index;
 
-        SlotItemType newType = itemTypes[lastIndex];
-        
-        if(newType == targetItemType)
-        {
-            CoroutineStarter.Instance.DED(" Target Item from reset : " + targetItemType.ToString());
-            targetItemIndex = index;
+            SlotItemType newType = itemTypes[lastIndex];
+
+            if (newType == targetItemType)
+            {
+                /*CoroutineStarter.Instance.DED(" Target Item from reset : " + targetItemType.ToString());*/
+                targetItemIndex = index;
+            }
+            visibleItems[index].SetCharacter(newType, info.GetValue(newType));
+            visibleItems[index].SetCharacter(newType, info.GetValue(newType));
         }
-        visibleItems[index].SetCharacter(newType, info.GetValue(newType));
+        reuseItemIndex.Clear();
     }
 
     public void Clear()

@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Diagnostics;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +14,7 @@ public class Slot : MonoBehaviour
     [SerializeField] private float ResultDelay = 0f;
     [SerializeField] private int slotItemCount = 7;
     [SerializeField] private Button playButton;
+    [SerializeField] private TMP_Text timer;
 
     private SlotSetupManager setupManager;
     private SlotMovementManager movementManager;
@@ -23,6 +27,7 @@ public class Slot : MonoBehaviour
         setupManager = new SlotSetupManager(slotPanel, template, slotInfo, slotItemCount);
         (visibleItems, lasttop) =  setupManager.SetupPlayGround();
         movementManager = new SlotMovementManager(slotPanel, lasttop, ref slotInfo, ref visibleItems);
+        movementManager.MovementStopped += StopStopWatch;
 
         playButton.onClick.AddListener(OnRollPress);
 
@@ -37,6 +42,7 @@ public class Slot : MonoBehaviour
     private void OnRollPress()
     {
         StartRoll();
+        StartStopWatch();
     }
 
     internal void SetTarget(SlotItemType type)
@@ -49,8 +55,28 @@ public class Slot : MonoBehaviour
         movementManager.StartRoll(ResultDelay, targetType);
     }
 
+    private Stopwatch stopwatch = new Stopwatch();
+    internal void StartStopWatch()
+    {
+        timer.text = "";
+        stopwatch.Start();
+    }
+
+    internal void StopStopWatch()
+    {
+        TimeSpan time = stopwatch.Elapsed;
+        time = time - TimeSpan.FromSeconds(ResultDelay * 0.2f);
+        timer.text = time.ToString(@"ss\.fff");
+        stopwatch.Reset();
+    }
+
+
     private void OnDestroy()
     {
+        stopwatch.Stop();
+        stopwatch = null;
+        if(movementManager != null)
+            movementManager.MovementStopped -= StopStopWatch;
         playButton.onClick.RemoveListener(OnRollPress);
         movementManager.Clear();
         setupManager.Clear();

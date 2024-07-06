@@ -28,7 +28,7 @@
         // Debug error data
         internal void DED(string data)
         {
-            //Debug.LogError("ERNOS : " + data);
+            Debug.LogError("ERNOS : " + data);
         }
     }
 
