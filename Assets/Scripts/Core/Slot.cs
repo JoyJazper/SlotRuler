@@ -7,7 +7,7 @@ public class Slot : MonoBehaviour
     [SerializeField] private SlotItem template;
     [SerializeField] private SlotItemInfo slotInfo;
     [SerializeField] private SlotItemType targetType;
-    [SerializeField] private float ResultDelay = 0f;
+    [SerializeField] private int resultDelayOrder = 0;
     [SerializeField] private int slotItemCount = 7;
     [SerializeField] private Button playButton;
     
@@ -22,7 +22,7 @@ public class Slot : MonoBehaviour
         int lasttop = slotItemCount - 1;
         setupManager = new SlotSetupManager(slotPanel, template, slotInfo, slotItemCount);
         (visibleItems, lasttop) =  setupManager.SetupPlayGround();
-        movementManager = new SlotMovementManager(lasttop, ref slotInfo, ref visibleItems);
+        movementManager = new SlotMovementManager(resultDelayOrder, lasttop, ref slotInfo, ref visibleItems);
         //movementManager.MovementStopped += StopStopWatch;
 
         playButton.onClick.AddListener(OnRollPress);
@@ -48,7 +48,7 @@ public class Slot : MonoBehaviour
 
     private void StartRoll()
     {
-        movementManager.StartRoll(ResultDelay, targetType);
+        movementManager.StartRoll(targetType);
     }
 
     /// <summary>

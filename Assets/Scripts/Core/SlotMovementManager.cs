@@ -3,31 +3,51 @@ using UnityEngine;
 using DG.Tweening;
 using JoyKit.Utility;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SlotMovementManager
 {
-    private readonly float moveDownSpeed = 100f;
-    private readonly float topSpeedCoef = 1f;
-    private readonly float totalTime = 1.5f;
-    private readonly float rollInitalPull = -0.5f;
+    #region Fix Data
+    private const float moveDownSpeed = 100f;
+    private const float topSpeedCoef = 1f;
+    private const float totalTime = 0.8f;
+    private const float rollInitalPull = -0.5f;
+    private const float delayTime = 0.2f;
+    private const float resetDelay = 0.1f;
+    private const float beforeEndHeight = 500f;
 
-    private SlotItemInfo info;
+    private readonly SlotItemInfo info;
+    private readonly SlotItem[] visibleItems;
+    private readonly List<SlotItemType> itemTypes = new List<SlotItemType>();
+    private readonly float checkEndHeight, itemHeight, resultDelay;
+    #endregion
 
-    private float moveDownCoef = 1f, checkEndHeight = 0f, itemHeight = 200f, resultDelay = 0f;
-    private bool shouldMove = false, fixedOutput = false;
+    #region Variables
+    private float moveDownCoef = 1f;
+    private bool shouldMove = false, outputSet = false;
     private int lastTopIndex = -1, targetItemIndex = -1;
     private SlotItemType targetItemType = SlotItemType.none;
-    private SlotItem[] visibleItems;
-    private List<SlotItemType> itemTypes = new List<SlotItemType>();
+    private List<int> reuseItemIndex = new List<int>();
+    #endregion
 
-    public SlotMovementManager(int topItemIndex, ref SlotItemInfo info, ref SlotItem[] visibleItems)
+    #region Setup
+    public SlotMovementManager(int delayOrder, int topItemIndex, ref SlotItemInfo info, ref SlotItem[] visibleItems)
     {
         lastTopIndex = topItemIndex;
         this.visibleItems = visibleItems;
         this.info = info;
         itemTypes = info.GetSlotItemList();
-        checkEndHeight = -3f * visibleItems[0].Height;
+        checkEndHeight = CalculateDepthBarrier();
         itemHeight = visibleItems[0].Height;
+        resultDelay = delayOrder;
+    }
+
+    private float CalculateDepthBarrier()
+    {
+        if(visibleItems != null && visibleItems.Count() > 0)
+            return ((visibleItems.Count() - 1) / 2 * -1) * visibleItems[0].Height;
+        else 
+            return 300f; // assumption
     }
 
     private void GenerateTarget()
@@ -37,6 +57,27 @@ public class SlotMovementManager
         //CoroutineStarter.Instance.DED(" Random Target : " + targetItemType.ToString());
     }
 
+    private void SetMoveVariables()
+    {
+        moveDownCoef = rollInitalPull;
+        shouldMove = true;
+    }
+
+    private void SetStopVariables()
+    {
+        outputSet = false;
+        shouldMove = false;
+        targetItemIndex = -1;
+    }
+
+    public void Clear()
+    {
+        itemTypes.Clear();
+    }
+
+    #endregion
+
+    #region Main Roll
     public void CheckMovement()
     {
         if (shouldMove)
@@ -44,8 +85,6 @@ public class SlotMovementManager
             Move();
         }
     }
-
-    List<int> reuseItemIndex = new List<int>();
 
     public void Move()
     {
@@ -69,122 +108,17 @@ public class SlotMovementManager
 
     }
 
-    public void StartRoll(float delay = 0f, SlotItemType targettype = SlotItemType.none)
-    {
-        if (shouldMove) return;
-
-        SetMoveState(delay);
-
-        if (targettype != SlotItemType.none)
-        {
-            targetItemType = targettype;
-        }
-        else
-        {
-            GenerateTarget();
-        }
-
-        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime/2).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
-    }
-
-    private void SetMoveState(float delay)
-    {
-        resultDelay = delay;
-        moveDownCoef = rollInitalPull;
-        shouldMove = true;
-    }
-
-    private IEnumerator StopRoll()
-    {
-        yield return new WaitForSeconds(resultDelay * 0.2f);
-
-        int IndexDistance = CalculateIndexDistance();
-
-        float totalDistance = itemHeight * IndexDistance;
-        MoveAllitems(totalDistance);
-
-        while (true)
-        {
-            if (targetItemIndex >= 0)
-            {
-                float distance = visibleItems[targetItemIndex].GetPosition();
-                AdjustMoveDownCoef(distance);
-                if (Mathf.Approximately(distance, 0))
-                    break;
-            }
-            yield return new WaitForFixedUpdate();
-        }
-        ResetValues();
-    }
-
-    private int CalculateIndexDistance()
-    {
-        int index1 = -1, index2 = -1;
-        for (int i = 0; i < itemTypes.Count; i++)
-        {
-            if (itemTypes[i] == visibleItems[lastTopIndex].SlotType)
-            {
-                index1 = i;
-            }
-            if (itemTypes[i] == targetItemType)
-            {
-                index2 = i;
-            }
-            if (index1 != -1 && index2 != -1)
-            {
-                break;
-            }
-        }
-        return (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
-    }
-
-    
-
-    // returns true if its zero
-    private bool AdjustMoveDownCoef(float distance)
-    {
-        if (distance < 0)
-        {
-            return false;
-        }
-
-        if (distance < 100)
-        {
-            moveDownCoef = 0f;
-            float newPosition = visibleItems[targetItemIndex].GetPosition();
-            MoveAllitems(newPosition);
-            //MovementStopped?.Invoke();
-            return true;
-        }
-
-        if (distance > 100 && !fixedOutput)
-        {
-            fixedOutput = true;
-            float newPosition = visibleItems[targetItemIndex].GetPosition();
-            MoveAllitems(newPosition - 500);
-        }
-
-        return false;
-    }
-
     private void MoveAllitems(float distance)
     {
-        foreach(var item in visibleItems)
+        foreach (var item in visibleItems)
         {
             item.MoveDown(distance);
         }
     }
 
-    private void ResetValues()
-    {
-        fixedOutput = false;
-        shouldMove = false;
-        targetItemIndex = -1;
-    }
-
     private void ReuseItem(List<int> indexes)
     {
-        foreach(var index in indexes)
+        foreach (var index in indexes)
         {
             if (targetItemType == visibleItems[index].SlotType)
             {
@@ -217,9 +151,131 @@ public class SlotMovementManager
         reuseItemIndex.Clear();
     }
 
-    public void Clear()
+    #endregion
+
+    #region Roll State Management
+
+    #region Start Roll
+    public void StartRoll(SlotItemType targettype = SlotItemType.none)
     {
-        itemTypes.Clear();
-        itemTypes = null;
+        if (shouldMove) return;
+
+        SetMoveVariables();
+
+        if (targettype != SlotItemType.none)
+        {
+            targetItemType = targettype;
+        }
+        else
+        {
+            GenerateTarget();
+        }
+
+        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
     }
+
+    #endregion
+
+    #region End Roll
+    /// <summary>
+    /// This controls the sequence of stopping the object.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator StopRoll()
+    {
+        yield return new WaitForSeconds(resultDelay * delayTime);
+
+        GetTargetOnTop();
+
+        // setting the target at 500 distance
+        while (true)
+        {
+            if (targetItemIndex >= 0)
+            {
+                float distance = visibleItems[targetItemIndex].GetPosition();
+                SetResult(distance);
+                if (Mathf.Approximately(distance, 0))
+                    break;
+            }
+            yield return new WaitForFixedUpdate();
+        }
+
+        yield return new WaitForSeconds(((2 - resultDelay) * delayTime) + resetDelay);
+        SetStopVariables();
+    }
+
+    /// <summary>
+    /// we calculate the items to generate to get the desired result on top.
+    /// </summary>
+    /// <returns></returns>
+    private int CalculateIndexDistance()
+    {
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < itemTypes.Count; i++)
+        {
+            if (itemTypes[i] == visibleItems[lastTopIndex].SlotType)
+            {
+                index1 = i;
+            }
+            if (itemTypes[i] == targetItemType)
+            {
+                index2 = i;
+            }
+            if (index1 != -1 && index2 != -1)
+            {
+                break;
+            }
+        }
+        return (index2 >= index1) ? (index2 - index1) : (itemTypes.Count - (index1 - index2));
+    }
+
+    /// <summary>
+    /// Move the objects required to get the desired target on top.
+    /// </summary>
+    private void GetTargetOnTop()
+    {
+        int IndexDistance = CalculateIndexDistance();
+
+        float totalDistance = itemHeight * IndexDistance;
+        MoveAllitems(totalDistance);
+    }
+
+    /// <summary>
+    /// We set the target at a distance of "beforeEndHeight" above the final position and let it flow.
+    /// For realism in slow speed animations.
+    /// It still shifts but less obvious.
+    /// - returns true if its zero
+    /// </summary>
+    /// <param name="distance">current distance from 0 to target</param>
+    /// <returns></returns>
+    private bool SetResult(float distance)
+    {
+        if (distance < 0)
+        {
+            return false;
+        }
+
+        if (distance < itemHeight)
+        {
+            moveDownCoef = 0f;
+            float newPosition = visibleItems[targetItemIndex].GetPosition();
+            MoveAllitems(newPosition);
+            //MovementStopped?.Invoke();
+            return true;
+        }
+
+        if (distance > itemHeight && !outputSet)
+        {
+            outputSet = true;
+            float newPosition = visibleItems[targetItemIndex].GetPosition();
+            MoveAllitems(newPosition - beforeEndHeight);
+        }
+
+        return false;
+    }
+
+    #endregion
+
+    #endregion
+
 }

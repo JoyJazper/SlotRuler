@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-public class SlotSetupManager
+internal class SlotSetupManager
 {
-    private RectTransform slotPanel;
-    private SlotItem template;
-    private SlotItemInfo slotInfo;
+    private readonly RectTransform slotPanel;
+    private readonly SlotItem template;
+    private readonly SlotItemInfo slotInfo;
+    private readonly int slotItemCount;
+
     private List<SlotItemType> items;
-    private int slotItemCount;
-    public SlotSetupManager(RectTransform slotPanel, SlotItem template, SlotItemInfo slotInfo, int slotItemCount)
+    internal SlotSetupManager(RectTransform slotPanel, SlotItem template, SlotItemInfo slotInfo, int slotItemCount)
     {
         this.slotPanel = slotPanel;
         this.template = template;
@@ -16,7 +17,7 @@ public class SlotSetupManager
         this.slotItemCount = slotItemCount;
     }
 
-    public (SlotItem[], int) SetupPlayGround()
+    internal (SlotItem[], int) SetupPlayGround()
     {
         SlotItem[] visibleItems = new SlotItem[slotItemCount];
         float[] setPositions = new float[slotItemCount];
@@ -46,7 +47,7 @@ public class SlotSetupManager
         return newItem;
     }
 
-    public void Clear()
+    internal void Clear()
     {
         items.Clear();
         items = null;
