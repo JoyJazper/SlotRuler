@@ -6,7 +6,9 @@ using System.Collections.Generic;
 public class SlotMovementManager
 {
     private readonly float moveDownSpeed = 100f;
-    private readonly float topSpeedCoef = 1.5f;
+    private readonly float topSpeedCoef = 1f;
+    private readonly float totalTime = 1.5f;
+    private readonly float rollInitalPull = -0.5f;
 
     private RectTransform slotPanel;
     private SlotItemInfo info;
@@ -70,7 +72,7 @@ public class SlotMovementManager
     {
         if (shouldMove) return;
         resultDelay = delay;
-        moveDownCoef = -0.2f;
+        moveDownCoef = rollInitalPull;
         shouldMove = true;
         //CoroutineStarter.Instance.DED("Time to roll");
         if (targettype != SlotItemType.none)
@@ -82,14 +84,14 @@ public class SlotMovementManager
         {
             GenerateTarget();
         }
-        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, 3f).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
+        DOTween.To(() => moveDownCoef, x => moveDownCoef = x, topSpeedCoef, totalTime/3).OnComplete(() => CoroutineStarter.Instance.StartCoroutine(StopRoll()));
     }
 
     
 
     private IEnumerator StopRoll()
     {
-        yield return new WaitForSeconds(resultDelay);
+        yield return new WaitForSeconds(resultDelay * totalTime / 3);
         float distance = 1000f;
         while (moveDownCoef != 0)
         {
@@ -109,8 +111,8 @@ public class SlotMovementManager
             yield return null;
         }
         
-        slotPanel.DOShakeAnchorPos(0.2f, 20f).OnComplete(() => ResetValues());
-        
+        //slotPanel.DOShakeAnchorPos(0.2f, 20f).OnComplete(() => ResetValues());
+        ResetValues();
     }
 
     float deceleration = 9f;
