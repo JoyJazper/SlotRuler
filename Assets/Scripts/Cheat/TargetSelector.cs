@@ -56,29 +56,28 @@ public class TargetSelector : MonoBehaviour
         slots.Add(slot);
     }
 
-    private void OnEnable()
-    {
-        
-    }
-
     private void GenerateSlotMenu()
     {
         ClearSlotMenu();
 
         foreach (var slot in slots)
         {
-            var button = slotPooler.Get();
-            button.onClick.RemoveAllListeners();
-            button.transform.SetParent(slot_Parent, false);
+            var button = GenerateButton(slotPooler, slot_Parent);
             button.onClick.AddListener(() => GenerateSlotItemsMenu(slot));
             button.GetComponentInChildren<TMP_Text>(true).text = slot.gameObject.name;
         }
 
-        var button1 = slotPooler.Get();
-        button1.onClick.RemoveAllListeners();
-        button1.transform.SetParent(slot_Parent, false);
+        var button1 = GenerateButton(slotPooler, slot_Parent);
         button1.onClick.AddListener(() => GenerateSlotItemsMenu());
         button1.GetComponentInChildren<TMP_Text>(false).text = "All";
+    }
+
+    private Button GenerateButton(ObjectPooler<Button> pooler, Transform parent)
+    {
+        var button = slotPooler.Get();
+        button.onClick.RemoveAllListeners();
+        button.transform.SetParent(slot_Parent, false);
+        return button;
     }
 
     private void ClearSlotMenu()
@@ -95,16 +94,12 @@ public class TargetSelector : MonoBehaviour
 
         foreach (var itemType in itemTypes)
         {
-            var button = slotItemPooler.Get();
-            button.onClick.RemoveAllListeners();
-            button.transform.SetParent(slotitem_Parent, false);
+            var button = GenerateButton(slotItemPooler, slotitem_Parent);
             button.GetComponentInChildren<SlotItemTSTemplate>().target.sprite = slotInfo.GetValue(itemType);
             AddActionToButton(button, itemType, slot);
         }
 
-        var button2 = slotItemPooler.Get();
-        button2.onClick.RemoveAllListeners();
-        button2.transform.SetParent(slotitem_Parent, false);
+        var button2 = GenerateButton(slotItemPooler, slotitem_Parent);
         AddActionToButton(button2, SlotItemType.none, slot);
     }
 
