@@ -74,9 +74,9 @@ public class TargetSelector : MonoBehaviour
 
     private Button GenerateButton(ObjectPooler<Button> pooler, Transform parent)
     {
-        var button = slotPooler.Get();
+        var button = pooler.Get();
         button.onClick.RemoveAllListeners();
-        button.transform.SetParent(slot_Parent, false);
+        button.transform.SetParent(parent, false);
         return button;
     }
 
