@@ -4,16 +4,18 @@ using DG.Tweening;
 using JoyKit.Utility;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class SlotMovementManager
 {
     #region Fix Data
+    public event Action MovementStopped;
+
     private const float moveDownSpeed = 100f;
     private const float topSpeedCoef = 1f;
     private const float totalTime = 0.8f;
     private const float rollInitalPull = -0.5f;
     private const float delayTime = 0.2f;
-    private const float resetDelay = 0.1f;
     private const float beforeEndHeight = 500f;
 
     private readonly SlotItemInfo info;
@@ -68,6 +70,7 @@ public class SlotMovementManager
         outputSet = false;
         shouldMove = false;
         targetItemIndex = -1;
+        MovementStopped?.Invoke();
     }
 
     public void Clear()
@@ -199,8 +202,6 @@ public class SlotMovementManager
             }
             yield return new WaitForFixedUpdate();
         }
-
-        yield return new WaitForSeconds(((2 - resultDelay) * delayTime) + resetDelay);
         SetStopVariables();
     }
 
@@ -255,7 +256,7 @@ public class SlotMovementManager
             return false;
         }
 
-        if (distance < itemHeight)
+        if (distance < itemHeight * 2)
         {
             moveDownCoef = 0f;
             float newPosition = visibleItems[targetItemIndex].GetPosition();
@@ -264,7 +265,7 @@ public class SlotMovementManager
             return true;
         }
 
-        if (distance > itemHeight && !outputSet)
+        if (distance > itemHeight * 2 && !outputSet)
         {
             outputSet = true;
             float newPosition = visibleItems[targetItemIndex].GetPosition();

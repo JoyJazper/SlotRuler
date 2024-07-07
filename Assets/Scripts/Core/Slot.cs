@@ -10,24 +10,95 @@ public class Slot : MonoBehaviour
     [SerializeField] private int resultDelayOrder = 0;
     [SerializeField] private int slotItemCount = 7;
     [SerializeField] private Button playButton;
-    
 
-    private SlotSetupManager setupManager;
+    public int slotID;
+    #region Instance Independent
+    private static int slotCount = 0;
+    private static bool[] Ready;
+    private static bool IsAllSlotsReady
+    {
+        get
+        {
+            if (Ready == null || Ready.Length == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < slotCount; i++)
+            {
+                if (!Ready[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        set
+        {
+            for (int i = 0; i < slotCount; i++)
+            {
+                Ready[i] = value;
+            }
+        }
+    }
+
+    private static bool CheckIsReady()
+    {
+        slotCount++;
+        bool isReady = IsAllSlotsReady;
+        if (slotCount >= Ready.Length)
+        {
+            IsAllSlotsReady = false;
+            slotCount = 0;
+        }
+        return isReady;
+    }
+
+    private static void SetIsReady()
+    {
+        slotCount++;
+        if (slotCount >= Ready.Length)
+        {
+            IsAllSlotsReady = true;
+            slotCount = 0;
+        }
+    }
+    #endregion
+
     private SlotMovementManager movementManager;
 
     private SlotItem[] visibleItems;
 
+    private void Awake()
+    {
+        slotID = slotCount;
+        slotCount++;
+    }
+
     private void Start()
     {
-        int lasttop = slotItemCount - 1;
-        setupManager = new SlotSetupManager(slotPanel, template, slotInfo, slotItemCount);
-        (visibleItems, lasttop) =  setupManager.SetupPlayGround();
-        movementManager = new SlotMovementManager(resultDelayOrder, lasttop, ref slotInfo, ref visibleItems);
-        //movementManager.MovementStopped += StopStopWatch;
-
-        playButton.onClick.AddListener(OnRollPress);
+        if(Ready == null)
+        {
+            Ready = new bool[slotCount];
+            slotCount = 0;
+        }
 
         TargetSelector.RegisterSlot?.Invoke(this);
+        
+        SetupMovementManager();
+        playButton.onClick.AddListener(OnRollPress);
+    }
+
+    private void SetupMovementManager()
+    {
+        int lasttop = slotItemCount - 1;
+        SlotSetupManager setupManager = new SlotSetupManager(slotPanel, template, slotInfo, slotItemCount);
+        (visibleItems, lasttop) = setupManager.SetupPlayGround();
+        movementManager = new SlotMovementManager(resultDelayOrder, lasttop, ref slotInfo, ref visibleItems);
+        movementManager.MovementStopped += SetIsReady;
+        setupManager.Clear();
+        SetIsReady();
     }
 
     private void FixedUpdate()
@@ -37,7 +108,10 @@ public class Slot : MonoBehaviour
 
     private void OnRollPress()
     {
-        StartRoll();
+        if (CheckIsReady())
+        {
+            movementManager.StartRoll(targetType);
+        }
         //StartStopWatch();
     }
 
@@ -46,43 +120,15 @@ public class Slot : MonoBehaviour
         targetType = type;
     }
 
-    private void StartRoll()
-    {
-        movementManager.StartRoll(targetType);
-    }
-
-    /// <summary>
-    /// commented section is for countdown.
-    /// </summary>
-    //[SerializeField] private TMP_Text timer;
-    //private Stopwatch stopwatch = new Stopwatch();
-    //internal void StartStopWatch()
-    //{
-    //    timer.text = "";
-    //    stopwatch.Start();
-    //}
-    //
-    //internal void StopStopWatch()
-    //{
-    //    TimeSpan time = stopwatch.Elapsed;
-    //    time = time - TimeSpan.FromSeconds(ResultDelay * 0.2f);
-    //    timer.text = time.ToString(@"ss\.fff");
-    //    stopwatch.Reset();
-    //}
-    //
 
     private void OnDestroy()
     {
-        //stopwatch.Stop();
-        //stopwatch = null;
-        //if(movementManager != null)
-        //    movementManager.MovementStopped -= StopStopWatch;
+        movementManager.MovementStopped -= SetIsReady;
         playButton.onClick.RemoveListener(OnRollPress);
         movementManager.Clear();
-        setupManager.Clear();
         slotInfo.Clean();
+        Ready = null;
         movementManager = null;
-        setupManager = null;
         StopAllCoroutines();
     }
 }
